@@ -23,7 +23,7 @@ class AddUserIdToRecipes extends Migration
         //add to the posts table the next column
         Schema::table('posts', function($table){
             //the name is "user_id"
-            $table->integer("user_id");
+            $table->integer("user_id")->nullable()->index();
         });
     }
 

@@ -28,7 +28,7 @@ Route::resource('posts', 'PostsController');
 
 Auth::routes();
 
-Route::resource('user', 'UserController');
+Route::resource('user', 'UserController')->only(['edit', 'update']);
 
 
 Route::get('/home', 'HomeController@index')->name('home');

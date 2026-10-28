@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'default' => env('LOG_CHANNEL', 'stack'),
+
+    'channels' => [
+        'stack' => [
+            'driver' => 'stack',
+            'channels' => [env('LOG_STACK', 'single')],
+            'ignore_exceptions' => false,
+        ],
+        'single' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+        // Hosting platforms read logs from stderr.
+        'stderr' => [
+            'driver' => 'monolog',
+            'handler' => Monolog\Handler\StreamHandler::class,
+            'with' => ['stream' => 'php://stderr'],
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+    ],
+];

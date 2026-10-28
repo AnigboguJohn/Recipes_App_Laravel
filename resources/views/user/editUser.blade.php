@@ -1,49 +1,29 @@
 @extends('layouts.app')
 @section('content')
-
     <section class="edit">
-           <h2>Edit <span> {{$user->name}} </span></h2>
-           {{-- the action is to PUT to PostsController update function--}}
-            {!! Form::open(['action' => ['UserController@update', $user->id ], 'method' => 'POST', 'enctype' => 'multipart/form-data']) !!}
-               <div class="form-group">
-                    {{Form::label('name','Username')}}
-                    {{--this is how we pass the $post->property as a default value --}}
-                    {{Form::text('name',  $user->name )}}
-               </div> 
-               <div class="form-group">
-                    {{Form::label('email','Email')}}
-                    {{--this is how we pass the $post->property as a default value --}}
-                    {{Form::text('email',  $user->email)}}
-               </div> 
-                 <div class="form-group">
-                    {{Form::label('avatar','Avatar')}}
-                    {{Form::file('avatar')}}
-                    {{-- hidden file for the image --}}
-                    {{-- this is the hidden file --}}
-                    {{Form::hidden("imagename", $user->avatar)}}
-               </div>  
-                  <div class="form-group2">
-                    <p>You can change these settings at any time.</p>   
-                    <div class="form-edit-meta">
-                      
-                        {{ Form::submit('Edit User', '')}}
+        <h2>Edit <span> {{ $user->name }} </span></h2>
 
-                    </div>
+        <form method="POST" action="{{ route('user.update', $user->id) }}" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="form-group">
+                <label for="name">Username</label>
+                <input id="name" type="text" name="name" value="{{ old('name', $user->name) }}" required maxlength="255">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email" value="{{ old('email', $user->email) }}" required maxlength="255">
+            </div>
+            <div class="form-group">
+                <label for="avatar">Avatar</label>
+                <input id="avatar" type="file" name="avatar" accept="image/png,image/jpeg,image/webp,image/gif">
+            </div>
+            <div class="form-group2">
+                <p>You can change these settings at any time.</p>
+                <div class="form-edit-meta">
+                    <input type="submit" value="Save Profile">
                 </div>
-                {{Form::hidden("_method", "PUT")}}
-
-            {!! Form::close() !!}
-
-                               
-                      
+            </div>
+        </form>
     </section>
-    {{-- this is the way we delete the post
-        use the destroy function of the controller
-        and pass the ID, just like the update,
-        that way laravel knows what to delete
-     --}}
-       {!! Form::open(["action" => ["UserController@destroy", $user->id], "method" => "POST", "class" => "delete"]) !!}
-                {{Form::hidden("_method","DELETE")}}
-                {{Form::submit('Delete User', '')}}
-            {!! Form::close() !!}   
 @endsection

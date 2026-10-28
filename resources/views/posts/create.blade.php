@@ -1,43 +1,38 @@
 @extends("layouts.app")
 @section("content")
-   {{-- this is a Laravel package that give us special functionality
-        go to laravelcollective.com/docs/master/html to learn more
-   --}}
-
-
     <section>
-           <h2>New Recipe</h2>
-           
-            {!! Form::open(['action' => 'PostsController@store', 'method' => 'POST', 'enctype' => 'multipart/form-data']) !!}
-               <div class="form-group">
-                    {{Form::label('title','Title')}}
-                    {{Form::text('title', '',['placeholder' => 'This is the recipe name' ])}}
-               </div> 
-               <div class="form-group">
-                    {{Form::label('preptime','Preparation Time')}}
-                    {{Form::text('preptime', '',['placeholder' => 'The time it would take for the whole recipe to be completed, doesnt have to be exact' ])}}
-               </div> 
-               <div class="form-group">
-                    {{Form::label('image','Image')}}
-                    {{Form::file('image', '')}}
-               </div> 
-                 <div class="form-group">
-                    {{Form::label('description','Description')}}
-                    {{Form::textarea('description', '',['placeholder' => 'Describe the recipe, give a little overview of what to expect ' ])}}
-               </div> 
-               <div class="form-group">
-                    {{Form::label('ingredients','Ingredients')}}
-                    {{Form::textarea('ingredients', '',['placeholder' => 'The ingredients needed for the recipe, separate them with commas' ])}}
-               </div> 
-               <div class="form-group">
-                    {{Form::label('preparation','Preparation')}}
-                    {{Form::textarea('preparation', '',['placeholder' => 'The detailed recipe preparation process' ])}}
-               </div> 
-               <div class="form-group2">
-                <p>Proofread your recipe, make sure the information is clear and there are no missing ingredients</p>   
-                    {{Form::submit('Add Recipe', '')}}
-                </div>
-            {!! Form::close() !!}
+        <h2>New Recipe</h2>
 
+        <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data">
+            @csrf
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input id="title" type="text" name="title" value="{{ old('title') }}" placeholder="This is the recipe name" required maxlength="120">
+            </div>
+            <div class="form-group">
+                <label for="preptime">Preparation Time</label>
+                <input id="preptime" type="text" name="preptime" value="{{ old('preptime') }}" placeholder="How long the whole recipe takes, e.g. 45 minutes" required maxlength="60">
+            </div>
+            <div class="form-group">
+                <label for="image">Image</label>
+                <input id="image" type="file" name="image" accept="image/png,image/jpeg,image/webp,image/gif" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" placeholder="Describe the recipe, give a little overview of what to expect" required>{{ old('description') }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="ingredients">Ingredients</label>
+                <textarea id="ingredients" name="ingredients" placeholder="The ingredients needed, one per line" required>{{ old('ingredients') }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="preparation">Preparation</label>
+                <textarea id="preparation" name="preparation" placeholder="The step-by-step preparation" required>{{ old('preparation') }}</textarea>
+            </div>
+            <div class="form-group2">
+                <p>Proofread your recipe, make sure the information is clear and there are no missing ingredients</p>
+                <input type="submit" value="Add Recipe">
+            </div>
+        </form>
     </section>
 @endsection

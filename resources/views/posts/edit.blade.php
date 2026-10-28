@@ -1,63 +1,51 @@
 @extends("layouts.app")
 @section("content")
-   
     <section class="edit">
-           <h2>Edit Recipe <span> {{$post->title}} </span></h2>
-           {{-- the action is to PUT to PostsController update function--}}
-            {!! Form::open(['action' => ['PostsController@update', $post->id ], 'method' => 'POST', 'enctype' => 'multipart/form-data']) !!}
-               <div class="form-group">
-                    {{Form::label('title','Title')}}
-                    {{--this is how we pass the $post->property as a default value --}}
-                    {{Form::text('title',  $post->title ,['placeholder' => 'This is the recipe name' ])}}
-               </div> 
-               <div class="form-group">
-                    {{Form::label('preptime','Preparation Time')}}
-                    {{Form::text('preptime', $post->preptime ,['placeholder' => 'The time it would take for the whole recipe to be completed, doesnt have to be exact' ])}}
-               </div> 
-               <div class="form-group">
-                    {{Form::label('image','Image')}}
-                    {{Form::file('image')}}
-                    {{-- hidden file for the image --}}
-                    {{-- this is the hidden file --}}
-                    {{Form::hidden("imagename", $post->cover)}}
-               </div> 
-                 <div class="form-group">
-                    {{Form::label('description','Description')}}
-                    {{Form::textarea('description', $post->description ,['placeholder' => 'Describe the recipe, give a little overview of what to expect ' ])}}
-               </div> 
-               <div class="form-group">
-                    {{Form::label('ingredients','Ingredients')}}
-                    {{Form::textarea('ingredients', $post->ingredients ,['placeholder' => 'The ingredients needed for the recipe, separate them with commas' ])}}
-               </div> 
-               <div class="form-group">
-                    {{Form::label('preparation','Preparation')}}
-                    {{Form::textarea('preparation', $post->preparation,['placeholder' => 'The detailed recipe preparation process' ])}}
-               </div> 
-               <div class="form-group2">
-                    <p>Proofread your recipe, make sure the information is clear and there are no missing ingredients</p>   
-                    <div class="form-edit-meta">
-                      
-                        {{ Form::submit('Edit Recipe', '')}}
+        <h2>Edit Recipe <span> {{ $post->title }} </span></h2>
 
-                    </div>
+        <form method="POST" action="{{ route('posts.update', $post->id) }}" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input id="title" type="text" name="title" value="{{ old('title', $post->title) }}" placeholder="This is the recipe name" required maxlength="120">
+            </div>
+            <div class="form-group">
+                <label for="preptime">Preparation Time</label>
+                <input id="preptime" type="text" name="preptime" value="{{ old('preptime', $post->preptime) }}" placeholder="How long the whole recipe takes, e.g. 45 minutes" required maxlength="60">
+            </div>
+            <div class="form-group">
+                <label for="image">Image <small>(leave empty to keep the current photo)</small></label>
+                <input id="image" type="file" name="image" accept="image/png,image/jpeg,image/webp,image/gif">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" placeholder="Describe the recipe, give a little overview of what to expect" required>{{ old('description', $post->description) }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="ingredients">Ingredients</label>
+                <textarea id="ingredients" name="ingredients" placeholder="The ingredients needed, one per line" required>{{ old('ingredients', $post->ingredients) }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="preparation">Preparation</label>
+                <textarea id="preparation" name="preparation" placeholder="The step-by-step preparation" required>{{ old('preparation', $post->preparation) }}</textarea>
+            </div>
+            <div class="form-group2">
+                <p>Proofread your recipe, make sure the information is clear and there are no missing ingredients</p>
+                <div class="form-edit-meta">
+                    <input type="submit" value="Save Recipe">
                 </div>
-                {{-- we need to tell laravel to change the POST to PUT --}}
-                {{-- this changes the POST request to a PUT request
-                    which is what Laravel is waiting when updating a post --}}
-                {{Form::hidden("_method", "PUT")}}
-
-            {!! Form::close() !!}
-
-                               
-                      
+            </div>
+        </form>
     </section>
-    @if (!Auth::guest())
-               @if (Auth::user()->id == $post->user_id)
-                 {!! Form::open(["action" => ["PostsController@destroy", $post->id], "method" => "POST", "class" => "delete"]) !!}
-                {{Form::hidden("_method","DELETE")}}
-                {{Form::submit('Delete This Post', '')}}
-            {!! Form::close() !!}   
-               @endif 
-            @endif
-      
+
+    @auth
+        @if (Auth::id() == $post->user_id)
+            <form method="POST" action="{{ route('posts.destroy', $post->id) }}" class="delete" onsubmit="return confirm('Delete this recipe? This cannot be undone.');">
+                @csrf
+                @method('DELETE')
+                <input type="submit" value="Delete This Recipe">
+            </form>
+        @endif
+    @endauth
 @endsection

@@ -6,15 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
+    protected $fillable = ['title', 'preptime', 'description', 'ingredients', 'preparation'];
 
-   // time to add something to our Post Model 
-   public function user(){
-        // we do the same here
-        // just saying a post belongs to a user
-        // that way the relationship
-        //between the 2 tables is created
+    /** A recipe belongs to the user who posted it. */
+    public function user()
+    {
         return $this->belongsTo('App\User');
-   }
+    }
+
+    /** Public URL of the cover photo. */
+    public function coverUrl(): string
+    {
+        return asset('storage/covers/' . rawurlencode($this->cover));
+    }
 }
-
-

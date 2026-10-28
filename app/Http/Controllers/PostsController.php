@@ -2,285 +2,126 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-//-------- Bring the model
 use App\Post;
-use Auth;
-
-//the first step on creting a laravel app
-//is to create a controller or model
-//the order doesnt matter
-
-//in this case this is the controller
-//what a controller does is that it gives the behavior to the app
-//--------- command to create a controller: php artisan make:controller controllerName --resource ----------------
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PostsController extends Controller
 {
-    
-
-
-    // must be inside constructor    
+    /** Anyone can browse recipes; adding, editing and deleting need an account. */
     public function __construct()
     {
-         
         $this->middleware('auth', ['except' => ['index', 'show']]);
     }
 
- 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    /** All recipes, newest first. */
     public function index()
     {
-     
-        $posts = Post::all();
-        return view("posts.index")->with('posts', $posts);
+        $posts = Post::with('user')->latest()->get();
+
+        return view('posts.index')->with('posts', $posts);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-      
-        return view("posts.create");
-
+        return view('posts.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
+        $data = $this->validateRecipe($request, true);
 
-       
-        //get the request
-        //and validate the fields
-        // now this is the function that stores the data in the database table
-
-        //first we validate the incoming request
-        $this->validate(
-            //the names match the input names of the form
-            //then we say if it can be null or required
-            $request, [
-                'title' => 'required',
-                'preptime' => 'required',
-                'image' => 'required|image|max:1999', //this is for the image, "image" means it MUST be an image file
-                'description' => 'required',
-                'ingredients' => 'required',
-                'preparation' => 'required'
-            ]
-        );
-
-        //------- handle the image upload
-    
-        //get the file name
-        //this is the $request file we got from the POST
-        $fullFilename = $request->file('image')->getClientOriginalName();
-        //get the just the name
-        $filename = pathinfo($fullFilename, PATHINFO_FILENAME);
-        //get the extension
-        $fileExt = $request->file('image')->getClientOriginalExtension();
-
-        //----  get the file ready to be stored
-         
-        $renamedFile =  $filename . "_" . time() . "." . $fileExt;
-
-     
-        $path = $request->file('image')->storeAs("public/covers", $renamedFile);
-
-     
         $post = new Post;
-      
-        $post->title = $request->input('title');
-        $post->preptime = $request->input('preptime');
-       
-        $post->cover = $renamedFile; 
-        $post->description = $request->input('description');
-        $post->ingredients = $request->input('ingredients');
-        $post->preparation = $request->input('preparation');
-
+        $post->fill($data);
+        $post->cover = $this->storeCover($request);
         $post->user_id = Auth::id();
-        
-        //--- save the post
-        $post->save();   
+        $post->save();
 
-        //-----redirect
-        return redirect("/posts")->with("success", "Post Created!");
-
+        return redirect('/posts/' . $post->id)->with('success', 'Recipe added!');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
-        //find the current post using the id
-        //the show functions shows the file information
-        $post= Post::find($id); //get the post using the ID
-        return view("posts.show")->with('post', $post); //return a view with the post data
+        $post = Post::with('user')->findOrFail($id);
+
+        return view('posts.show')->with('post', $post);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
-       
-        $post = Post::find($id);
-        if(auth()->user()->id !== $post->user_id){
-            return redirect("/")->with('error', "You are not authorized to perform that action");
-        }else{
-            return view("posts.edit")->with('post', $post);
+        $post = Post::findOrFail($id);
+        if (! $this->owns($post)) {
+            return redirect('/')->with('error', 'You can only edit your own recipes.');
         }
+
+        return view('posts.edit')->with('post', $post);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
-        //update the post information
-
-        //works similar to the store function
-        //we get the data
-        // and do the rename for the image if there is any
-        //get the request
-        //and validate the fields
-        $this->validate(
-            $request, [
-                'title' => 'required',
-                'preptime' => 'required',
-                'image' => 'nullable|image|max:1999', //set the image as optional
-                'description' => 'required',
-                'ingredients' => 'required',
-                'preparation' => 'required'
-            ]
-        );
-
-        //------- we need to check if there is a new image in the set
-        //if the image file comes without a value
-        if( empty($request->file('image'))){
-
-            //we just set the value of a hidden file
-            //which returns the current image name
-            //so laravel sets that name again
-            //else it will set it to "" empty string
-
-            //we get the value of the hidden imagename input
-            //and set it to the variable that we will store in the database
-            //in this case it will be the same as the one before
-            $newFile = $request->input('imagename');
-        }else{
-            //------- handle the image upload
-            //------- if theres an image we rename it
-
-            //get the file name
-            $fullFilename = $request->file('image')->getClientOriginalName();
-            //get the just the name
-            $filename = pathinfo($fullFilename, PATHINFO_FILENAME);
-            //get the extension
-            $fileExt = $request->file('image')->getClientOriginalExtension();
-
-            //get the file ready to be stored
-            //adding a timestamp     
-            $newFile =  $filename . "_" . time() . "." . $fileExt;
-
-            //-------- store the image
-            //prepare the path where the image is going to be saved
-            //-------- to get access to the folder create a symlink, run the next code: 
-            //-------- php artisan storage:link
-            //-------- a new folder will appear in the public folder
-            $path = $request->file('image')->storeAs("public/covers", $newFile);
-            
-                //------- remove the image that was before
-
-
-                //get the previous name
-                //we get the hidden input name 
-                //remember thats the old image name
-                $fileToDelete = $request->input('imagename');
-                //use the default directory separator for the OS
-                //and here we use unlink on the image
-                $prevFile = "storage". DIRECTORY_SEPARATOR . "covers" . DIRECTORY_SEPARATOR . $fileToDelete;
-                //use public_path to find the path to the file
-                unlink(public_path($prevFile));
-
-                //laravel wont delete the image even if another one is set
-                //it will just add it
-
+        $post = Post::findOrFail($id);
+        if (! $this->owns($post)) {
+            return redirect('/')->with('error', 'You can only edit your own recipes.');
         }
 
-      
-        dd(Auth::id());
-        
-        //find the post to update (recipe)
-        $post = Post::find($id);
-        $post->title = $request->input('title');
-        $post->preptime = $request->input('preptime');
-        $post->cover = $newFile; // we save the renamed file, not the original
-        $post->description = $request->input('description');
-        $post->ingredients = $request->input('ingredients');
-        $post->preparation = $request->input('preparation');
+        $data = $this->validateRecipe($request, false);
+        $post->fill($data);
 
-       
-         //save the post
-         $post->save();   
+        // A new photo replaces the old one. The old file name comes from the database,
+        // never from the form, so a crafted request can't delete other files.
+        if ($request->hasFile('image')) {
+            $this->deleteCover($post->cover);
+            $post->cover = $this->storeCover($request);
+        }
+        $post->save();
 
-        
-            
-
-         //redirect
-         return redirect("/posts")->with("success", "Post Updated!");
+        return redirect('/posts/' . $post->id)->with('success', 'Recipe updated!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-
-        
-        $post = Post::find($id);
-            
-        if(auth()->user()->id !== $post->user_id){
-            return redirect("/")->with('error', "You are not authorized to perform that action");
-        }else{
-            $fileToDelete = $post->cover;
-           
-            $prevFile = "storage". DIRECTORY_SEPARATOR . "covers" . DIRECTORY_SEPARATOR . $fileToDelete;
-         
-            unlink(public_path($prevFile));
-      
-        
-            $post->delete();
-            return redirect("/posts")->with("success", "Post Deleted!");
-
+        $post = Post::findOrFail($id);
+        if (! $this->owns($post)) {
+            return redirect('/')->with('error', 'You can only delete your own recipes.');
         }
-              
-      
 
+        $this->deleteCover($post->cover);
+        $post->delete();
+
+        return redirect('/posts')->with('success', 'Recipe deleted!');
+    }
+
+    private function validateRecipe(Request $request, bool $imageRequired): array
+    {
+        $data = $this->validate($request, [
+            'title' => 'required|string|max:120',
+            'preptime' => 'required|string|max:60',
+            'image' => ($imageRequired ? 'required' : 'nullable') . '|image|mimes:jpg,jpeg,png,webp,gif|max:1999',
+            'description' => 'required|string|max:2000',
+            'ingredients' => 'required|string|max:5000',
+            'preparation' => 'required|string|max:10000',
+        ]);
+        unset($data['image']);
+
+        return $data;
+    }
+
+    private function owns(Post $post): bool
+    {
+        return Auth::check() && (int) $post->user_id === (int) Auth::id();
+    }
+
+    /** Saves the uploaded photo under storage/app/public/covers with a random name. */
+    private function storeCover(Request $request): string
+    {
+        return basename($request->file('image')->store('covers', 'public'));
+    }
+
+    private function deleteCover(?string $file): void
+    {
+        if ($file && $file === basename($file)) {
+            Storage::disk('public')->delete('covers/' . $file);
+        }
     }
 }

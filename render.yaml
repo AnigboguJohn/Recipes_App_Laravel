@@ -1,0 +1,15 @@
+# Render Blueprint: dashboard.render.com -> New -> Blueprint -> pick this repository.
+services:
+  - type: web
+    name: recipes-app
+    runtime: docker
+    plan: free
+    region: frankfurt
+    healthCheckPath: /
+    envVars:
+      - key: APP_NAME
+        value: My Recipes Book
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"

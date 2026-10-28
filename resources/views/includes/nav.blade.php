@@ -1,7 +1,7 @@
 <nav>
    <ul>
-    <li><a href="/projects/php/simpleblog/public/posts">Recipes</a></li>
-    <li><a href="/projects/php/simpleblog/public/posts/create">Add Recipe</a></li>
+    <li><a href="{{ url('/posts') }}">Recipes</a></li>
+    <li><a href="{{ url('/posts/create') }}">Add Recipe</a></li>
       <!-- Authentication Links 
       just copied and editted the file a little-->
       <!-- the views are installed after you set up the make:auth command -->

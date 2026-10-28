@@ -13,14 +13,14 @@
     @else
         <!--once the user changed the profile avatar, we can access that from here
         using the avatar column-->
-        <div class="avatar" style='background:url("storage/avatars/{{Auth::user()->avatar}}")center;background-size:100%'></div>
+        <div class="avatar" style="background:url('{{ asset('storage/avatars/'.rawurlencode(Auth::user()->avatar)) }}') center/cover"></div>
     @endif
 
 </div>  
  
   <div class="ribbon">
   <!--We access the current user data using Auth:user->property or table value -->
-         <h2>Dashboard | <a href="/projects/php/simpleblog/public/user/{{Auth::user()->id}}/edit">Edit</a></h2>
+         <h2>Dashboard | <a href="{{ url('/user/'.Auth::id().'/edit') }}">Edit</a></h2>
          <h3>{{ Auth::user()->name }} </h3>
          <p>{{ Auth::user()->email }}</p>
 
@@ -39,7 +39,7 @@
       
         @foreach ($posts as $post )
          <div class="myrecipe">
-            <img src="storage/covers/{{$post->cover}}" />
+            <a href="{{ url('/posts/'.$post->id) }}"><img src="{{ $post->coverUrl() }}" alt="{{ $post->title }}" /></a>
             <h3>{{$post->title}}</h3>  
         </div>   
         @endforeach

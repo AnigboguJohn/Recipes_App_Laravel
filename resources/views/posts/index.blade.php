@@ -10,16 +10,16 @@
             {{-- we use the object notation for OOP $post->property --}}
                 <div class="recipe">
                     <div class="image">
-                        <a href="/projects/php/simpleblog/public/posts/{{$post->id}}">
-                            <div class="outcover" style='background:url("storage/covers/{{$post->cover}}")center;background-size:100%'></div>
+                        <a href="{{ url('/posts/'.$post->id) }}">
+                            <div class="outcover" style="background:url('{{ $post->coverUrl() }}') center/cover"></div>
                         </a>
                     </div>
                     <div class="meta">
                         <p class="title">{{$post->title}}</p>
                         <!-- here we get the name of the user
                         that created this post -->
-                         <p>Recipe by: <strong>{{$post->user->name}}</strong></p>
-                         <p class="description"> {{str_limit($post->description, 62)}}</p>
+                         <p>Recipe by: <strong>{{ optional($post->user)->name ?? 'Unknown' }}</strong></p>
+                         <p class="description"> {{ \Illuminate\Support\Str::limit($post->description, 62) }}</p>
                     </div>
                 </div>
             @endforeach

@@ -3,6 +3,7 @@
 @section('content')
 <section>
 <h2>Login</h2>
+<p class="demo-note">Just looking? Sign in with the demo account: <strong>demo@recipes.test</strong> / <strong>demo12345</strong></p>
    
                     <form method="POST" action="{{ route('login') }}">
                         {{ csrf_field() }}
