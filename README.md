@@ -2,7 +2,7 @@
 
 A recipe-sharing web app built with **Laravel 12** (PHP 8.3). Search Nigerian and home recipes, filter by category, save your favourites, rate dishes and cook step by step with built-in timers. Signed-in cooks post their own recipes with a photo, and only the owner can edit or delete them.
 
-**Live demo:** _coming soon_ · **Demo login:** `demo@recipes.test` / `demo12345` (or tap **Use demo** on the login page)
+**Live demo:** [recipes-app-7qw7.onrender.com](https://recipes-app-7qw7.onrender.com) · **Demo login:** `demo@recipes.test` / `demo12345` (or tap **Use demo** on the login page)
 
 | Home | Recipe | Cooking mode | Phone |
 |---|---|---|---|
