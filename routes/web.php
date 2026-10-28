@@ -1,34 +1,20 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" e group. Now create something great!
-|
-*/
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
-//we need routes in order for the app to work
-//---- this is the main route
-//---- the first page the app will load
-//---- we assign the controller function we want to use
-// in this case is the index function
-//lets see what it does
-Route::get('/', "PostsController@index");
+// Home: search, categories and all recipes
+Route::get('/', 'PostsController@index')->name('recipes');
 
-//forgot to mention
-//this is a special syntax
-//that creates all the routes for the post model
-//that way we dont have to define the with the get functionality
-//that way we can access the routes
 Route::resource('posts', 'PostsController');
+Route::get('/posts/{post}/cook', 'PostsController@cook')->name('posts.cook');
+Route::post('/posts/{post}/save', 'SavedController@toggle')->name('posts.save');
+Route::post('/posts/{post}/rate', 'RatingController@store')->name('posts.rate');
+Route::get('/saved', 'SavedController@index')->name('saved');
 
 Auth::routes();
 
 Route::resource('user', 'UserController')->only(['edit', 'update']);
 
-
+// Profile and my recipes
 Route::get('/home', 'HomeController@index')->name('home');

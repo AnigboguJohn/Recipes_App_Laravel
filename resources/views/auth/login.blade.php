@@ -1,59 +1,34 @@
 @extends('layouts.app')
+@section('title', 'Log in')
 
 @section('content')
-<section>
-<h2>Login</h2>
-<p class="demo-note">Just looking? Sign in with the demo account: <strong>demo@recipes.test</strong> / <strong>demo12345</strong></p>
-   
-                    <form method="POST" action="{{ route('login') }}">
-                        {{ csrf_field() }}
+    <div class="auth">
+        <div class="auth-card panel">
+            <h1>Hello there 👋</h1>
+            <p class="lead">Log in to save, rate and share recipes.</p>
 
-                        <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                            <label for="email">E-Mail Address</label>
+            <div class="demo">
+                <span>Just looking? Use the demo account<br><b>demo@recipes.test</b> / <b>demo12345</b></span>
+                <button type="button" class="btn btn-primary btn-sm" id="useDemo">Use demo</button>
+            </div>
 
-                            <div>
-                                <input id="email" type="email" placeholder="youremail@email.com" name="email" value="{{ old('email') }}" required autofocus>
-
-                                @if ($errors->has('email'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-                            <label for="password">Password</label>
-
-                            <div>
-                                <input id="password" type="password" name="password" required>
-
-                                @if ($errors->has('password'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('password') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                        
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}> Remember Me
-                                    </label>
-                                </div>
-                          
-                        </div>
-
-                        <div class="form-group2">
-                           
-                            <a class="btn btn-link" href="{{ route('password.request') }}">
-                                    Forgot Your Password?
-                            </a>   
-                             <input type="submit" value="Login" />
-                        </div>
-                    </form>
-    
-</section>
+            <form method="POST" action="{{ route('login') }}" class="form">
+                @csrf
+                <div class="field {{ $errors->has('email') ? 'error' : '' }}">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="email">
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" name="password" required autocomplete="current-password">
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                    <label class="check"><input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}> Remember me</label>
+                    <a href="{{ route('password.request') }}" class="link">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Log in</button>
+            </form>
+            <p class="auth-foot">New here? <a href="{{ route('register') }}">Create an account</a></p>
+        </div>
+    </div>
 @endsection

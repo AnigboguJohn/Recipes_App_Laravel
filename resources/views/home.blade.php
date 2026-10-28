@@ -1,65 +1,48 @@
-@extends('layouts.app')
+@extends('layouts.app', ['tab' => 'profile'])
+@section('title', 'Your profile')
 
 @section('content')
+    <section class="panel profile">
+        <img class="avatar avatar-lg" src="{{ $user->avatarUrl() }}" alt="{{ $user->name }}">
+        <h1>{{ $user->name }}</h1>
+        <p class="muted" style="margin:2px 0 0">{{ $user->email }}</p>
+        <div class="tiles">
+            <div class="tile"><b>{{ $posts->count() }}</b><small>{{ $posts->count() == 1 ? 'Recipe' : 'Recipes' }}</small></div>
+            <div class="tile"><b>{{ $savedCount }}</b><small>Saved</small></div>
+            <div class="tile"><b>{{ $ratingsCount ? '★ ' . number_format($ratingsAvg, 1) : '–' }}</b><small>{{ $ratingsCount }} {{ $ratingsCount == 1 ? 'rating' : 'ratings' }}</small></div>
+        </div>
+        <div class="form-actions" style="justify-content:center;margin-top:18px">
+            <a href="{{ route('user.edit', $user->id) }}" class="btn btn-ghost btn-sm">@include('partials.icon', ['name' => 'edit']) Edit profile</a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn btn-ghost btn-sm">@include('partials.icon', ['name' => 'logout']) Log out</button>
+            </form>
+        </div>
+    </section>
 
-<!-- This is the home view that auth creates -->
-<!-- First lets take a look at the controller  -->
-<section class="home">
-<div class="avatarBackground">
-<!-- here is the file called "default.png" -->
-   <!-- regular if else statements -->
-    @if(Auth::user()->avatar == "default.png")
-        <div class="avatar" style='background:url("{{asset('/images/default.png')}}") center;background-size:100%'></div>
+    <div class="section-head"><h2>My recipes</h2><a href="{{ route('posts.create') }}">+ Add recipe</a></div>
+    @if ($posts->count())
+        <div class="list">
+            @foreach ($posts as $post)
+                @php $avg = $post->averageRating(); @endphp
+                <div class="row">
+                    <a href="{{ route('posts.show', $post->id) }}"><img src="{{ $post->coverUrl() }}" alt="" loading="lazy"></a>
+                    <a href="{{ route('posts.show', $post->id) }}" class="grow">
+                        <h3>{{ $post->title }}</h3>
+                        <div class="meta">
+                            <span>@include('partials.icon', ['name' => 'clock']) {{ $post->preptime }}</span>
+                            <span>{{ $avg ? '★ ' . number_format($avg, 1) : 'No ratings yet' }}</span>
+                        </div>
+                    </a>
+                    <a href="{{ route('posts.edit', $post->id) }}" class="icon-btn" aria-label="Edit {{ $post->title }}">@include('partials.icon', ['name' => 'edit'])</a>
+                </div>
+            @endforeach
+        </div>
     @else
-        <!--once the user changed the profile avatar, we can access that from here
-        using the avatar column-->
-        <div class="avatar" style="background:url('{{ asset('storage/avatars/'.rawurlencode(Auth::user()->avatar)) }}') center/cover"></div>
-    @endif
-
-</div>  
- 
-  <div class="ribbon">
-  <!--We access the current user data using Auth:user->property or table value -->
-         <h2>Dashboard | <a href="{{ url('/user/'.Auth::id().'/edit') }}">Edit</a></h2>
-         <h3>{{ Auth::user()->name }} </h3>
-         <p>{{ Auth::user()->email }}</p>
-
-  </div>
- 
-    <!-- there is a LOT of code, if you dont understand something
-    tell me about it in the comments and I will make a vid just for that feature -->
-
-    <!-- I think I forgot something -->
-  <div>
-    <h2>My Recipes</h2>
-    <div class="myrepices-container">
-
-    <!--we count the number of posts and display them here -->
-    @if (count($posts) > 0)
-      
-        @foreach ($posts as $post )
-         <div class="myrecipe">
-            <a href="{{ url('/posts/'.$post->id) }}"><img src="{{ $post->coverUrl() }}" alt="{{ $post->title }}" /></a>
-            <h3>{{$post->title}}</h3>  
-        </div>   
-        @endforeach
-       
-    @else
-        <p>There are no recipes to show yet.</p>         
-    @endif
-   </div>
-  </div>  
-
-<!-- this is a little status message laravel includes with the home.blade -->
-<div class="panel-body">
-    @if (session('status'))
-        <div class="alert alert-success">
-            {{ session('status') }}
+        <div class="empty">
+            <b>👩🏾‍🍳</b>
+            <p>You haven't posted a recipe yet.</p>
+            <a href="{{ route('posts.create') }}" class="btn btn-primary">Add your first recipe</a>
         </div>
     @endif
-
-    You are logged in!
-</div>
-
-</section>
 @endsection

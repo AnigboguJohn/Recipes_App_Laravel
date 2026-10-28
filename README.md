@@ -1,20 +1,24 @@
 # My Recipes Book
 
-A recipe-sharing web app built with **Laravel 12** (PHP 8.3). Anyone can browse recipes; signed-in cooks post their own with a photo, prep time, ingredients and step-by-step preparation, and only the owner can edit or delete them.
+A recipe-sharing web app built with **Laravel 12** (PHP 8.3). Search Nigerian and home recipes, filter by category, save your favourites, rate dishes and cook step by step with built-in timers. Signed-in cooks post their own recipes with a photo, and only the owner can edit or delete them.
 
-**Live demo:** _coming soon_ · **Demo login:** `demo@recipes.test` / `demo12345`
+**Live demo:** _coming soon_ · **Demo login:** `demo@recipes.test` / `demo12345` (or tap **Use demo** on the login page)
 
-![Recipes home page](docs/home.png)
+| Home | Recipe | Cooking mode | Phone |
+|---|---|---|---|
+| ![Home](docs/home.png) | ![Recipe](docs/recipe.png) | ![Cooking mode](docs/cook.png) | ![Phone](docs/phone.png) |
 
 ## Features
 
-- Browse all recipes, newest first, and open any recipe for its full details
-- Register, log in, log out and reset a password (Laravel UI authentication)
-- Add a recipe with a photo upload (JPG, PNG, WebP or GIF, up to 2 MB)
-- Edit or delete your own recipes; other people's recipes are protected
-- Dashboard with your recipes, plus a profile page with a name, email and avatar
-- Form validation that keeps what you typed when something is missing
-- Works on phones
+- **Home:** greeting, search by name or ingredient, category chips (Breakfast, Lunch, Dinner, Soups, Snacks, Desserts, Drinks), popular recipes and every recipe
+- **Recipe page:** large photo, cooking time, servings, difficulty and calories, ingredients, numbered steps, the cook's name, and more from the same category
+- **Cooking mode:** one step at a time with Previous and Next, a progress bar, and a timer whenever a step mentions minutes ("simmer for 10 minutes")
+- **Save** recipes with the heart (no page reload) and find them under **Saved**
+- **Rate** other people's recipes from 1 to 5 stars; the best rated show first under Popular
+- **Add and edit** recipes with photo preview, category, servings, difficulty and calories
+- **Profile:** your recipes, saved count and the ratings your recipes received; edit your name, email and avatar
+- Register, log in, log out and reset a password (Laravel UI)
+- Built for phones first, with a bottom menu; works on desktop too, and without JavaScript
 
 ## Tech stack
 
@@ -30,14 +34,19 @@ A recipe-sharing web app built with **Laravel 12** (PHP 8.3). Anyone can browse 
 
 ```
 app/
-├─ Http/Controllers/   PostsController (recipes), UserController (profile), HomeController, Auth/
+├─ Http/Controllers/   PostsController (recipes, search, cooking mode), SavedController, RatingController,
+│                      HomeController (profile), UserController (edit profile), Auth/
 ├─ Http/Middleware/    TrustProxies (HTTPS behind a host), CSRF, cookies
-├─ Post.php            recipe model (belongs to a user)
-└─ User.php            user model (has many recipes)
+├─ Post.php            recipe: categories, ingredient and step lists, step timers
+├─ Rating.php          1 to 5 stars, one per user per recipe
+└─ User.php            recipes, saved recipes, ratings
 database/
-├─ migrations/         users, password resets, recipes (posts), recipe owner
-└─ seeds/              demo account and four Nigerian recipes with covers
-resources/views/       layouts/, posts/ (index, show, create, edit), user/, auth/, home
+├─ migrations/         users, recipes, recipe details, saved recipes (favorites), ratings
+└─ seeds/              demo account, nine Nigerian recipes and their photos
+resources/views/       layouts/, partials/ (card, heart, icons), posts/ (index, show, cook, form), saved,
+                       home (profile), user/, auth/, errors/
+public/css/recipes.css the design (mobile first)
+public/js/recipes.js   save without reload, photo previews, cooking mode and timers
 routes/web.php         recipe routes, profile routes, auth routes
 docker/                Apache config and the start-up script
 Dockerfile · render.yaml
@@ -48,6 +57,7 @@ Dockerfile · render.yaml
 - Only the owner can edit or delete a recipe, checked on the server for every request
 - Profiles can only be changed by the signed-in owner
 - Uploaded files get random names, and old files are deleted by the name stored in the database, never by a name sent from the browser
+- You can't rate your own recipe, ratings must be 1 to 5, and rating again replaces your earlier rating
 - CSRF protection on every form, passwords hashed with bcrypt, uploads limited by type and size
 
 ## Run it locally
@@ -81,6 +91,10 @@ php artisan serve
 
 On the free plan the service sleeps when nobody uses it and its disk is reset, so the database starts fresh with the demo recipes after each wake-up. For data that lasts, set `DB_CONNECTION=pgsql` and the `DB_*` values to a free PostgreSQL database such as [Neon](https://neon.tech).
 
+## Photo credits
+
+The demo recipe photos come from [Wikimedia Commons](https://commons.wikimedia.org) under Creative Commons licences (mostly CC BY-SA 4.0). Each recipe page names the photographer and links to the original file; the full list is in `database/seeds/photos/credits.json`.
+
 ## History
 
-Started in 2018 as a Laravel 5.4 project. Upgraded in 2026 to Laravel 12 on PHP 8.3: the forms were rewritten in plain Blade (the old `laravelcollective/html` package doesn't support new Laravel), broken links and a leftover debug line were fixed, the security issues above were closed, and Docker hosting plus demo data were added.
+Started in 2018 as a Laravel 5.4 project. Upgraded in 2026 to Laravel 12 on PHP 8.3: the forms were rewritten in plain Blade (the old `laravelcollective/html` package doesn't support new Laravel), broken links and a leftover debug line were fixed, the security issues above were closed, and Docker hosting plus demo data were added. The design was then rebuilt mobile first, with categories, search, saved recipes, ratings and cooking mode.
